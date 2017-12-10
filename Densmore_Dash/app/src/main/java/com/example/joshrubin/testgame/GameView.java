@@ -365,7 +365,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                     canvas.drawText("Easy", S_WIDTH / 2 - (float) (31 * Background.scale), S_HEIGHT / 2 + (float) (185 * Background.scale), mode);
                 }
             }
-            if (hit) {
+            if (hit && gameUpdate) {
 
                 gameOver.setTextSize((float) (110 * Background.scale));
                 gameOver.setColor(Color.WHITE);

@@ -75,6 +75,9 @@ public class MainActivity extends Activity {
             pause = true;
             layoutF.removeView(button);
             layoutF.addView(pauseLayout);
+        } else {
+            layoutF.removeView(button);
+            quit(layoutF);
         }
     }
 
