@@ -84,6 +84,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private String[] saveData = new String[6];
     private boolean newHighScore;
     private int countHS = 0;
+    private int countDensmore = 0;
     private boolean commit = false;
 
     public GameView(Context context) {
@@ -239,7 +240,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             updateStats();
         }
         if (MainActivity.start || MainActivity.restart) {
-            doodle = new DoodleGuy(BitmapFactory.decodeResource(getResources(), R.drawable.fox));
+            if (MainActivity.makeDensmore) {
+                doodle = new DoodleGuy(BitmapFactory.decodeResource(getResources(), R.drawable.densmore_player_sprite));
+            } else {
+                doodle = new DoodleGuy(BitmapFactory.decodeResource(getResources(), R.drawable.fox));
+            }
             doodle.setStart((int) (111 * Background.scale), (int) (111 * Background.scale));
             doodle.setForce(1 * Background.scale);
 
@@ -288,10 +293,19 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         super.draw(canvas);
         if (canvas != null) {
             background.draw(canvas);
+            if (MainActivity.makeDensmore) {
+                countDensmore++;
+                if (countDensmore<100) {
+                    displayHS.setTextSize((float) (30 * Background.scale));
+                    displayHS.setColor(Color.RED);
+                    displayHS.setFakeBoldText(true);
+                    displayHS.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
+                    canvas.drawText("DENSMORE EQUIPPED", S_WIDTH / 2 - (float) (140 * Background.scale), (float) (30 * Background.scale), displayHS);
+                }
+            }
             if (gameUpdate && !hit) {
                 doodle.draw(canvas);
                 obstacleDraw(obstacleArray, canvas);
-
 
                 paintScore.setTextSize((float) (55 * Background.scale));
                 if (newHighScore) {

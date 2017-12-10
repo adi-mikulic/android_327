@@ -23,7 +23,7 @@ public class MainActivity extends Activity {
     private boolean key1 = false;
     private boolean key2 = false;
     private boolean key3 = false;
-    private boolean makeDensmore;
+    public static boolean makeDensmore;
     private LinearLayout statsLayout;
     private FrameLayout layoutF;
     private LayoutInflater inflate;
@@ -64,7 +64,7 @@ public class MainActivity extends Activity {
         layoutF.addView(gameView);
         layoutF.addView(mainmenu);
 
-        mySound = MediaPlayer.create(this,R.raw.patakas_world);
+        mySound = MediaPlayer.create(this, R.raw.patakas_world);
         mySound.start();
         mySound.setLooping(true);
 
@@ -157,15 +157,35 @@ public class MainActivity extends Activity {
     }
 
     public void button1(View view) {
-
+        if (key3) {
+            makeDensmore = true;
+            key1 = false;
+            key2 = false;
+            key3 = false;
+        } else if (key1) {
+            key2 = true;
+            key1 = false;
+        } else {
+            key1 = false;
+            key2 = false;
+        }
     }
 
     public void button2(View view) {
-
+        key1 = true;
+        key2 = false;
+        key3 = false;
     }
 
     public void button3(View view) {
-
+        if (key2) {
+            key2 = false;
+            key3 = true;
+        } else {
+            key1 = false;
+            key2 = false;
+            key3 = false;
+        }
     }
 
 }

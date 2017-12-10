@@ -5,6 +5,30 @@
     android:layout_height="match_parent">
 
     <Button
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:onClick="button1" />
+
+    <Button
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerInParent="true"
+        android:onClick="button2" />
+
+    <Button
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:onClick="button3" />
+
+    <Button
         android:id="@+id/stats"
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
