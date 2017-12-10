@@ -59,4 +59,16 @@
 
     </LinearLayout>
 
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:buttonTint="@android:color/darker_gray"
+        android:checked="true"
+        android:onClick="musicToggle"
+        android:layoutDirection="rtl"
+        android:text="Music"
+        android:textColorLink="@android:color/darker_gray" />
+
 </RelativeLayout>

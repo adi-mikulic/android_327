@@ -20,6 +20,10 @@ public class MainActivity extends Activity {
     public static boolean start = false;
     public static boolean restart = false;
     public static boolean stats = false;
+    private boolean key1 = false;
+    private boolean key2 = false;
+    private boolean key3 = false;
+    private boolean makeDensmore;
     private LinearLayout statsLayout;
     private FrameLayout layoutF;
     private LayoutInflater inflate;
@@ -152,5 +156,16 @@ public class MainActivity extends Activity {
         }
     }
 
+    public void button1(View view) {
+
+    }
+
+    public void button2(View view) {
+
+    }
+
+    public void button3(View view) {
+
+    }
 
 }

@@ -1,7 +1,6 @@
 package com.example.joshrubin.testgame;
 
 import android.content.SharedPreferences;
-import android.preference.Preference;
 import android.view.SurfaceView;
 import android.content.Context;
 import android.content.res.Resources;
@@ -11,7 +10,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import java.text.DecimalFormat;
@@ -170,10 +168,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             gamesPlayed = settings5.getInt("gamesPlayed", 0);
         }
         if (!settings6.contains("averageScore")) {
-            editor6.putInt("averageScore", 0);
+            editor6.putFloat("averageScore", 0);
             editor6.commit();
         } else {
-            averageScore = settings6.getFloat("averageScore", 0);
+            averageScore = (float)settings6.getFloat("averageScore", 0);
         }
         if (!settings7.contains("totalPoints")) {
             editor7.putInt("totalPoints", 0);
@@ -393,7 +391,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 canvas.drawText("Touch to restart", S_WIDTH / 2 - (float) (110 * Background.scale), S_HEIGHT - (float) (17 * Background.scale), touchRestart);
             }
             if (MainActivity.stats) {
-                DecimalFormat format = new DecimalFormat("###.00");
+                DecimalFormat format = new DecimalFormat("###.##");
                 stats.setTextSize((float) (50 * Background.scale));
                 stats.setColor(Color.BLACK);
                 canvas.drawText("Overall Highscore: "+saveOverallHighScore, S_WIDTH / 2 - (float) (200 * Background.scale), (S_HEIGHT / 2) - (float) (200 * Background.scale), stats);
