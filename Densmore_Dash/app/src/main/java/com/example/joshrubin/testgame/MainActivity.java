@@ -16,6 +16,7 @@ import static com.example.joshrubin.testgame.GameView.hit;
 
 public class MainActivity extends Activity {
 
+    //object variables
     public static boolean pause = false;
     public static boolean start = false;
     public static boolean restart = false;
@@ -30,15 +31,16 @@ public class MainActivity extends Activity {
     private RelativeLayout pauseLayout;
     public static RelativeLayout button;
     private RelativeLayout mainmenu;
-    private RelativeLayout gameOverLayout;
-    public static int score;
     private Button mode;
     private MediaPlayer mySound;
     private boolean soundOn = false;
     private int paused;
 
+    //overridden function
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        //call base class constructor and set up screen
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -46,6 +48,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         mode = (Button) findViewById(R.id.mode_button);
 
+        //set up all views in the game
         layoutF = (FrameLayout) findViewById(R.id.Frame);
         inflate = getLayoutInflater();
 
@@ -64,12 +67,14 @@ public class MainActivity extends Activity {
         layoutF.addView(gameView);
         layoutF.addView(mainmenu);
 
+        //set up music
         mySound = MediaPlayer.create(this, R.raw.patakas_world);
         mySound.start();
         mySound.setLooping(true);
 
     }
 
+    //pause button press
     public void pause(View view) {
         if (!hit) {
             pause = true;
@@ -81,12 +86,14 @@ public class MainActivity extends Activity {
         }
     }
 
+    //resume button press
     public void resume(View view) {
         pause = false;
         layoutF.removeView(pauseLayout);
         layoutF.addView(button);
     }
 
+    //start button press
     public void start(View view) {
         start = true;
         layoutF.removeView(mainmenu);
@@ -94,9 +101,11 @@ public class MainActivity extends Activity {
 
     }
 
+    //quit button press
     public void quit(View view) {
         start = false;
         pause = false;
+        hit = false;
         GameView.gameUpdate = false;
         GameView.obstacle1 = null;
         GameView.obstacle2 = null;
@@ -108,23 +117,16 @@ public class MainActivity extends Activity {
 
     }
 
+    //restart button press
     public void restart(View view) {
         pause = false;
         start = true;
         restart = true;
         layoutF.removeView(pauseLayout);
         layoutF.addView(button);
-
     }
 
-
-    public void gameOver(View view) {
-
-        layoutF.removeView(pauseLayout);
-        layoutF.addView(gameOverLayout);
-
-    }
-
+    //mode button press
     public void switchMode(View view) {
         if (GameView.gameMode == 0) {
             GameView.gameMode = 1;
@@ -135,18 +137,21 @@ public class MainActivity extends Activity {
         }
     }
 
+    //show stats button press
     public void showStats(View view) {
         layoutF.removeView(mainmenu);
         layoutF.addView(statsLayout);
         stats = true;
     }
 
+    //go back button press
     public void goBack(View view) {
         layoutF.addView(mainmenu);
         layoutF.removeView(statsLayout);
         stats = false;
     }
 
+    //music toggle button press
     public void musicToggle(View view) {
         if (!soundOn) {
             mySound.pause();
@@ -159,6 +164,9 @@ public class MainActivity extends Activity {
         }
     }
 
+    //for unlocking densmore
+
+    //secret button one press
     public void button1(View view) {
         if (key3) {
             makeDensmore = true;
@@ -174,12 +182,14 @@ public class MainActivity extends Activity {
         }
     }
 
+    //secret button two press
     public void button2(View view) {
         key1 = true;
         key2 = false;
         key3 = false;
     }
 
+    //secret button three press
     public void button3(View view) {
         if (key2) {
             key2 = false;

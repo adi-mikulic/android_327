@@ -15,40 +15,55 @@ import android.graphics.Rect;
 
 public class Background {
 
+    //object variables
     private Bitmap background;
     private int x;
     private int y;
     private float speed;
     private static final double B_HEIGHT = 600;
     private static final double B_WIDTH = 1600;
-    public static double scale = GameView.S_HEIGHT/B_HEIGHT;
-    private static int width = (int) (scale*B_WIDTH);
+    public static double scale = GameView.S_HEIGHT / B_HEIGHT;
+    private static int width = (int) (scale * B_WIDTH);
 
+    //background constructor
     public Background(Bitmap background) {
-        double scale = GameView.S_HEIGHT/B_HEIGHT;
-        int width = (int) (scale*B_WIDTH);
-        this.background= Bitmap.createScaledBitmap(background,width,GameView.S_HEIGHT, true);
+
+        //set up variables
+        double scale = GameView.S_HEIGHT / B_HEIGHT;
+        int width = (int) (scale * B_WIDTH);
+        this.background = Bitmap.createScaledBitmap(background, width, GameView.S_HEIGHT, true);
 
     }
 
+    //draw function
     public void draw(Canvas canvas) {
-        canvas.drawBitmap(background,x,y,null);
+        canvas.drawBitmap(background, x, y, null);
 
-        if (x<0) {
-            canvas.drawBitmap(background,(int)(x+width),y,null);
+        //if all the way off the screen, draw another bitmap right behing it
+        if (x < 0) {
+            canvas.drawBitmap(background, (int) (x + width), y, null);
         }
     }
 
+    //update function
     public void update() {
-        if (MainActivity.start && GameView.gameMode!=0) {
-            speed+=.0055*Background.scale;
-            x-=speed;
+
+        //move background across screen
+        if (MainActivity.start && GameView.gameMode != 0) {
+
+            //speeds up on start
+            speed += .0055 * Background.scale;
+            x -= speed;
         } else {
-            speed = (float)(2.8*Background.scale);
-            x-=speed;
+
+            //slow and steady on mainmenu
+            speed = (float) (2.8 * Background.scale);
+            x -= speed;
         }
-        if (x<-width) {
-            x=0;
+
+        //if if off screen by width, move to x=0
+        if (x < -width) {
+            x = 0;
         }
     }
 

@@ -12,6 +12,7 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
+
 import java.text.DecimalFormat;
 
 import java.util.Random;
@@ -23,9 +24,10 @@ import java.util.Random;
 
 public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
+    //object variables
+    private Background background;
     public static MainThread thread;
     public static DoodleGuy doodle;
-    private Background background;
     public static Obstacle obstacle1;
     public static Obstacle obstacle2;
     public static Obstacle obstacle3;
@@ -36,11 +38,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     public static Obstacle obstacle8;
     public static boolean hit;
     public static boolean gameUpdate = false;
+    public static Obstacle[] obstacleArray;
+    public static float points = 0;
     public final static int S_HEIGHT = Resources.getSystem().getDisplayMetrics().heightPixels;
     public final static int S_WIDTH = Resources.getSystem().getDisplayMetrics().widthPixels;
     public static int[] place = new int[70];
-    public static Obstacle[] obstacleArray;
-    public static float points = 0;
     private int count = 0;
     public static int gameMode = 0;
     private Paint mode = new Paint();
@@ -79,19 +81,20 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     public static int mediumHighScore;
     public static int easyHighScore;
     public static int gamesPlayed;
-    public static float averageScore;
     public static int totalPoints;
-    private String[] saveData = new String[6];
+    public static float averageScore;
     private boolean newHighScore;
     private int countHS = 0;
     private int countDensmore = 0;
-    private boolean commit = false;
 
     public GameView(Context context) {
+        //extends bas class constructor
         super(context);
 
+        //sets up surface holder for the GameView
         getHolder().addCallback(this);
 
+        //sets up constructor variables
         thread = new MainThread(getHolder(), this);
         setFocusable(true);
         settings1 = getContext().getSharedPreferences(fileNameOS, 0);
@@ -111,12 +114,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void setArrays() {
-
-
-        for (int i = 0; i < 6; i++) {
-
-        }
-
+        //sets up array with various obstacle heights
         for (int i = -(S_HEIGHT / 10), j = 0; j < 35; i -= 5.6 * Background.scale, j++) {
             place[j] = i;
         }
@@ -126,18 +124,22 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public int getRand() {
+        //get random number for array above
         int rand = new Random().nextInt(70);
         return place[rand];
     }
 
+    //overridden function
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
     }
 
+    //overridden function
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
 
+        //establishes saved data from phone, creates it if not there, assigns to variables if already exists
         if (!settings1.contains("overallHighScore")) {
             editor1.putInt("overallHighScore", 0);
             editor1.commit();
@@ -172,7 +174,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             editor6.putFloat("averageScore", 0);
             editor6.commit();
         } else {
-            averageScore = (float)settings6.getFloat("averageScore", 0);
+            averageScore = (float) settings6.getFloat("averageScore", 0);
         }
         if (!settings7.contains("totalPoints")) {
             editor7.putInt("totalPoints", 0);
@@ -181,17 +183,22 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             totalPoints = settings7.getInt("totalPoints", 0);
         }
 
+        //set up array
         setArrays();
 
+        //set up background object
         background = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.scrolling_background));
 
+        //start thread
         thread.setRunning(true);
         thread.start();
 
     }
 
+    //overridden function
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        //for when surface is destroyed
         boolean retry = true;
         while (retry) {
             try {
@@ -205,57 +212,84 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    //update function
     public void update() {
+
+        //update background if you did not hit an obstacle
         if (!hit) {
             background.update();
-        } else {
+        } else {//increment count to not allow for restart game
             count++;
         }
 
+        //for when game is playing
         if (gameUpdate && !hit) {
+
+            //check is collision happened
             if (checkCollision(obstacleArray, doodle)) {
+
+                //set hit to true and update game stats
                 hit = true;
-                totalPoints+=points;
+                totalPoints += points;
                 editor7.putInt("totalPoints", (int) totalPoints);
                 gamesPlayed++;
                 editor5.putInt("gamesPlayed", (int) gamesPlayed);
-                averageScore=(float)totalPoints/(float)gamesPlayed;
-                editor6.putFloat("averageScore",averageScore);
+                averageScore = (float) totalPoints / (float) gamesPlayed;
+                editor6.putFloat("averageScore", averageScore);
                 editor5.commit();
                 editor6.commit();
                 editor7.commit();
             }
+
+            //update the player and obstacles
             doodle.update();
             obstacleUpdate(obstacleArray);
 
+            //check if obstace passed doodle and if so add a point
             for (int i = 0; i < obstacleArray.length; i++) {
                 if (obstacleArray[i].pointcheck && obstacleArray[i].x < doodle.x && obstacleArray[i].x > 0) {
                     points++;
+
+                    //if in hard mode account for passing two obstacles at the same time
                     if (gameMode == 2) {
                         points -= .5;
                     }
+
+                    //set point check back to false
                     obstacleArray[i].pointcheck = false;
                 }
             }
+
+            //update the game stats
             updateStats();
         }
+
+        //for when you start or restart the game
         if (MainActivity.start || MainActivity.restart) {
+            //set up player image based on if you equipped densmore or not
             if (MainActivity.makeDensmore) {
                 doodle = new DoodleGuy(BitmapFactory.decodeResource(getResources(), R.drawable.densmore_player_sprite));
             } else {
                 doodle = new DoodleGuy(BitmapFactory.decodeResource(getResources(), R.drawable.fox));
             }
+
+            //set the starting place and force of the player
             doodle.setStart((int) (111 * Background.scale), (int) (111 * Background.scale));
             doodle.setForce(1 * Background.scale);
 
+            //set up the obstacles
             obstacle1 = new Obstacle(BitmapFactory.decodeResource(getResources(), R.drawable.brick_pattern), (int) (1111 * Background.scale), getRand(), false, null);
             obstacle2 = new Obstacle(BitmapFactory.decodeResource(getResources(), R.drawable.brick_pattern), (int) (1111 * Background.scale) + (S_WIDTH / 2), getRand(), false, null);
             obstacle3 = new Obstacle(BitmapFactory.decodeResource(getResources(), R.drawable.brick_pattern), (int) (1111 * Background.scale) + (S_WIDTH), getRand(), false, null);
             obstacle4 = new Obstacle(BitmapFactory.decodeResource(getResources(), R.drawable.brick_pattern), (int) (1111 * Background.scale) + (S_WIDTH / 2 * 3), getRand(), false, null);
+
+            //if game mode is not hard than there are only ever 4 obstacles
             if (gameMode != 2) {
                 obstacleArray = new Obstacle[4];
 
             } else {
+
+                //otherwise there are 8
                 obstacleArray = new Obstacle[8];
 
                 obstacle5 = new Obstacle(BitmapFactory.decodeResource(getResources(), R.drawable.brick_pattern), (int) (1111 * Background.scale), getOther(obstacle1), true, obstacle1);
@@ -272,11 +306,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             obstacleArray[1] = obstacle2;
             obstacleArray[2] = obstacle3;
             obstacleArray[3] = obstacle4;
+
+            //flip the start value
             if (MainActivity.start) {
                 MainActivity.start = false;
             } else if (MainActivity.restart) {
                 MainActivity.restart = false;
             }
+
+            //set up the game variables on start/restart
             points = 0;
             hit = false;
             gameUpdate = true;
@@ -287,15 +325,21 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     }
 
+    //overirdden function
     @Override
     public void draw(Canvas canvas) {
 
+        //calls the base class draw function
         super.draw(canvas);
         if (canvas != null) {
+
+            //always draw background
             background.draw(canvas);
+
+            //if densmore code is inputted
             if (MainActivity.makeDensmore) {
                 countDensmore++;
-                if (countDensmore<100) {
+                if (countDensmore < 100) {
                     displayHS.setTextSize((float) (30 * Background.scale));
                     displayHS.setColor(Color.RED);
                     displayHS.setFakeBoldText(true);
@@ -303,15 +347,23 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                     canvas.drawText("DENSMORE EQUIPPED", S_WIDTH / 2 - (float) (140 * Background.scale), (float) (30 * Background.scale), displayHS);
                 }
             }
+
+            //for when the game is going
             if (gameUpdate && !hit) {
                 doodle.draw(canvas);
                 obstacleDraw(obstacleArray, canvas);
 
                 paintScore.setTextSize((float) (55 * Background.scale));
+
+                //for when you get a new highscore
                 if (newHighScore) {
+
+                    //set score to red if new highscore
                     paintScore.setColor(Color.RED);
                     countHS++;
-                    if (countHS<100) {
+
+                    //only display for 100 ticks
+                    if (countHS < 100) {
                         displayHS.setTextSize((float) (30 * Background.scale));
                         displayHS.setColor(Color.WHITE);
                         displayHS.setFakeBoldText(true);
@@ -327,10 +379,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                         canvas.drawText("NEW HIGHSCORE!", S_WIDTH / 2 - (float) (115 * Background.scale), (float) (30 * Background.scale), displayHSO);
                     }
                 } else {
+                    //set score to black if not new highscore
                     paintScore.setColor(Color.BLACK);
                 }
+
+                //draw score
                 canvas.drawText("" + (int) points, (float) (11 * Background.scale), (float) (55 * Background.scale), paintScore);
             }
+
+            //for mainmenu view
             if (!gameUpdate && !MainActivity.stats) {
 
                 highScore.setTextSize((float) (34 * Background.scale));
@@ -351,6 +408,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 outline.setColor(Color.GREEN);
                 outline.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
                 canvas.drawText("DENSMORE DASH", (float) (55 * Background.scale), (float) (200 * Background.scale), outline);
+
+                //for gamemode choice
                 if (gameMode == 2) {
 
                     mode.setColor(Color.RED);
@@ -365,6 +424,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                     canvas.drawText("Easy", S_WIDTH / 2 - (float) (31 * Background.scale), S_HEIGHT / 2 + (float) (185 * Background.scale), mode);
                 }
             }
+
+            //if you lose
             if (hit && gameUpdate) {
 
                 gameOver.setTextSize((float) (110 * Background.scale));
@@ -378,7 +439,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 outline.setColor(Color.BLACK);
                 outline.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
                 canvas.drawText("GAME OVER", S_WIDTH / 2 - (float) (306 * Background.scale), (S_HEIGHT / 2) - (float) (125 * Background.scale), outline);
-                if (points==saveOverallHighScore) {
+
+                //if you got a new highscore
+                if (points == saveOverallHighScore) {
                     displayHS.setTextSize((float) (83 * Background.scale));
                     displayHS.setColor(Color.WHITE);
                     displayHS.setFakeBoldText(true);
@@ -400,28 +463,37 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                     endScore.setColor(Color.BLACK);
                     canvas.drawText("Score: " + (int) points, S_WIDTH / 2 - (float) (167 * Background.scale), (S_HEIGHT / 2) + (float) (42 * Background.scale), endScore);
                 }
+
+                //displays touch to restart
                 touchRestart.setTextSize((float) (28 * Background.scale));
                 touchRestart.setColor(Color.BLACK);
                 canvas.drawText("Touch to restart", S_WIDTH / 2 - (float) (110 * Background.scale), S_HEIGHT - (float) (17 * Background.scale), touchRestart);
             }
+
+            //for when to show stats
             if (MainActivity.stats) {
                 DecimalFormat format = new DecimalFormat("###.##");
                 stats.setTextSize((float) (50 * Background.scale));
                 stats.setColor(Color.BLACK);
-                canvas.drawText("Overall Highscore: "+saveOverallHighScore, S_WIDTH / 2 - (float) (200 * Background.scale), (S_HEIGHT / 2) - (float) (200 * Background.scale), stats);
-                canvas.drawText("Easy Highscore: "+easyHighScore, S_WIDTH / 2 - (float) (200 * Background.scale), (S_HEIGHT / 2) - (float) (150 * Background.scale), stats);
-                canvas.drawText("Medium Highscore: "+mediumHighScore, S_WIDTH / 2 - (float) (200 * Background.scale), (S_HEIGHT / 2) - (float) (100 * Background.scale), stats);
-                canvas.drawText("Hard Highscore: "+hardHighScore, S_WIDTH / 2 - (float) (200 * Background.scale), (S_HEIGHT / 2) - (float) (50 * Background.scale), stats);
-                canvas.drawText("Games Played: "+gamesPlayed, S_WIDTH / 2 - (float) (200 * Background.scale), (S_HEIGHT / 2) - (float) (0 * Background.scale), stats);
-                canvas.drawText("Average Score: "+format.format(averageScore), S_WIDTH / 2 - (float) (200 * Background.scale), (S_HEIGHT / 2) - (float) (-50 * Background.scale), stats);
+                canvas.drawText("Overall Highscore: " + saveOverallHighScore, S_WIDTH / 2 - (float) (200 * Background.scale), (S_HEIGHT / 2) - (float) (200 * Background.scale), stats);
+                canvas.drawText("Easy Highscore: " + easyHighScore, S_WIDTH / 2 - (float) (200 * Background.scale), (S_HEIGHT / 2) - (float) (150 * Background.scale), stats);
+                canvas.drawText("Medium Highscore: " + mediumHighScore, S_WIDTH / 2 - (float) (200 * Background.scale), (S_HEIGHT / 2) - (float) (100 * Background.scale), stats);
+                canvas.drawText("Hard Highscore: " + hardHighScore, S_WIDTH / 2 - (float) (200 * Background.scale), (S_HEIGHT / 2) - (float) (50 * Background.scale), stats);
+                canvas.drawText("Games Played: " + gamesPlayed, S_WIDTH / 2 - (float) (200 * Background.scale), (S_HEIGHT / 2) - (float) (0 * Background.scale), stats);
+                canvas.drawText("Average Score: " + format.format(averageScore), S_WIDTH / 2 - (float) (200 * Background.scale), (S_HEIGHT / 2) - (float) (-50 * Background.scale), stats);
             }
 
         }
     }
 
+    //overirdden function
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+
+        //for when playing the game
         if (MainActivity.start || gameUpdate) {
+
+            //for if you didn't lose
             if (!hit) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
@@ -433,6 +505,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 }
                 return super.onTouchEvent(event);
             } else {
+
+                //for if you lost
                 if (count > 25) {
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
                         return true;
@@ -448,7 +522,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         return false;
     }
 
-
+    //check if a obstacle and player collided
     public boolean checkIndividualCollision(Obstacle obstacle, DoodleGuy doodle) {
         int dx = doodle.image.getWidth();
         int dy = doodle.image.getHeight();
@@ -459,6 +533,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         return Rect.intersects(recd, reco);
     }
 
+    //to check if a the obstacle array and obstacles collided
     public boolean checkCollision(Obstacle[] array, DoodleGuy doodle) {
         for (int i = 0; i < array.length; i++) {
             if (checkIndividualCollision(array[i], doodle)) {
@@ -468,6 +543,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         return false;
     }
 
+    //for hard mode get pair obstacle y value
     public static int getOther(Obstacle obstacle) {
         if (obstacle.y < 0) {
             return (int) (obstacle.y + 140 * Background.scale + S_HEIGHT);
@@ -476,18 +552,21 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    //draw obstacles from array
     private void obstacleDraw(Obstacle[] array, Canvas canvas) {
         for (int i = 0; i < array.length; i++) {
             array[i].draw(canvas);
         }
     }
 
+    //update obstacles from array
     private void obstacleUpdate(Obstacle[] array) {
         for (int i = 0; i < array.length; i++) {
             array[i].update();
         }
     }
 
+    //update stats
     public void updateStats() {
         if (points > saveOverallHighScore) {
             editor1.putInt("overallHighScore", (int) points);
@@ -495,15 +574,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             saveOverallHighScore = (int) points;
             newHighScore = true;
         }
-        if (gameMode==0 && points>easyHighScore) {
+        if (gameMode == 0 && points > easyHighScore) {
             editor2.putInt("easyHighScore", (int) points);
             editor2.commit();
             easyHighScore = (int) points;
-        } else if (gameMode==1 && points>mediumHighScore) {
+        } else if (gameMode == 1 && points > mediumHighScore) {
             editor3.putInt("mediumHighScore", (int) points);
             editor3.commit();
             mediumHighScore = (int) points;
-        } else if (gameMode==2 && points>hardHighScore) {
+        } else if (gameMode == 2 && points > hardHighScore) {
             editor4.putInt("hardHighScore", (int) points);
             editor4.apply();
             hardHighScore = (int) points;
